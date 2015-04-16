@@ -1,11 +1,12 @@
 #include<windows.h>
 #include<stdio.h>
+#include<string.h>
 #include<iostream>
 
 
 using namespace std;
 
-#define DESTDIRECTORY "C:\\Users\\9973\\Desktop\\Dest_Directory\\"
+#define DESTDIRECTORY "C:\\myfolder\\ "
 long getDiffBetween(SYSTEMTIME start,SYSTEMTIME end)
 {
 	FILETIME ftStart;
@@ -43,6 +44,7 @@ int main(int argc, CHAR* argv[])
 
    //Set the current directory to your required folder 
   ::SetCurrentDirectory ("C:\\NEWBASE\\tools\\SQL-Scripts\\");
+   
   WIN32_FIND_DATA fd;
   FILETIME ftCreate;
   SYSTEMTIME stUTC, stLocal,stCurrent;
@@ -67,6 +69,7 @@ int main(int argc, CHAR* argv[])
 						 FileTimeToSystemTime(&ftCreate, &stUTC);
 						 SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
 
+
 						GetLocalTime(&stCurrent);
 						long diffTime=getDiffBetween(stLocal,stCurrent);
 						cout<<"Difference In times:"<<diffTime<<endl;
@@ -75,6 +78,7 @@ int main(int argc, CHAR* argv[])
 
 						if(diffTime>=noOfSeconds)
 						{
+							CreateDirectory ("C:\\myfolder", NULL);
 							char destPath[MAX_PATH];
 							strcpy(destPath,DESTDIRECTORY);
 							strcat(destPath,fd.cFileName);
