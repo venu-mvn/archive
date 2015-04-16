@@ -4,6 +4,7 @@
 #include<iostream>
 
 
+
 using namespace std;
 
 #define DESTDIRECTORY "C:\\myfolder\\ "
@@ -68,7 +69,15 @@ int main(int argc, CHAR* argv[])
 
 						 FileTimeToSystemTime(&ftCreate, &stUTC);
 						 SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
-
+						char buffer[ 256 ];
+						 sprintf( buffer, "%d-%02d-%02d %02d:%02d:%02d", 
+									stLocal.wYear,
+									stLocal.wMonth, 
+									stLocal.wDay,                      
+									stLocal.wHour, 
+									stLocal.wMinute, 
+									stLocal.wSecond );
+						
 
 						GetLocalTime(&stCurrent);
 						long diffTime=getDiffBetween(stLocal,stCurrent);
@@ -78,7 +87,7 @@ int main(int argc, CHAR* argv[])
 
 						if(diffTime>=noOfSeconds)
 						{
-							CreateDirectory ("C:\\myfolder", NULL);
+							CreateDirectory (DESTDIRECTORY, NULL);
 							char destPath[MAX_PATH];
 							strcpy(destPath,DESTDIRECTORY);
 							strcat(destPath,fd.cFileName);
