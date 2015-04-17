@@ -3,11 +3,10 @@
 #include<string.h>
 #include<iostream>
 
-
-
 using namespace std;
 
-#define DESTDIRECTORY "C:\\myfolder\\ "
+#define DESTDIRECTORY "D:\\ "
+#define SAMPLEFOLDER "myfolder"
 long getDiffBetween(SYSTEMTIME start,SYSTEMTIME end)
 {
 	FILETIME ftStart;
@@ -40,6 +39,15 @@ long getDiffBetween(SYSTEMTIME start,SYSTEMTIME end)
 	
 }
 
+string SystimeInString(SYSTEMTIME stime)
+{
+	char buf[40] = {0};
+	sprintf(buf,"%02d%02d%04d",stime.wDay, stime.wMonth, stime.wYear);
+	string dt;
+	dt.assign(buf);
+		return dt;
+}
+
 int main(int argc, CHAR* argv[])
 {
 
@@ -58,6 +66,11 @@ int main(int argc, CHAR* argv[])
 
    if (hFind != INVALID_HANDLE_VALUE) 
       {
+
+						char sampleFolder[MAX_PATH];
+						strcpy(sampleFolder,DESTDIRECTORY);
+						strcat(sampleFolder,SAMPLEFOLDER);
+						CreateDirectory(sampleFolder, NULL);
         do  {
                   //Only print files present in the directory, ignore if it is directory, the flag
                 //FILE_ATTRIBUTE_DIRECTORY will tell you if the item found is a file or directory
@@ -67,18 +80,10 @@ int main(int argc, CHAR* argv[])
 						printf(("%s\n"), fd.cFileName);
 						ftCreate=fd.ftCreationTime;
 
-						 FileTimeToSystemTime(&ftCreate, &stUTC);
-						 SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
-						char buffer[ 256 ];
-						 sprintf( buffer, "%d-%02d-%02d %02d:%02d:%02d", 
-									stLocal.wYear,
-									stLocal.wMonth, 
-									stLocal.wDay,                      
-									stLocal.wHour, 
-									stLocal.wMinute, 
-									stLocal.wSecond );
+						FileTimeToSystemTime(&ftCreate, &stUTC);
+						SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+						string date=SystimeInString(stLocal);
 						
-
 						GetLocalTime(&stCurrent);
 						long diffTime=getDiffBetween(stLocal,stCurrent);
 						cout<<"Difference In times:"<<diffTime<<endl;
@@ -87,12 +92,14 @@ int main(int argc, CHAR* argv[])
 
 						if(diffTime>=noOfSeconds)
 						{
-							CreateDirectory (DESTDIRECTORY, NULL);
-							char destPath[MAX_PATH];
-							strcpy(destPath,DESTDIRECTORY);
-							strcat(destPath,fd.cFileName);
-							cout<<"Path is:"<<destPath<<endl;
-							MoveFile(fd.cFileName,destPath);
+							char OutputFolder[MAX_PATH];
+							strcpy(OutputFolder,sampleFolder);
+							strcat(OutputFolder,"\\");
+							strcat(OutputFolder,date.c_str());
+							CreateDirectory(OutputFolder, NULL);
+							strcat(OutputFolder,"\\");
+							strcat(OutputFolder,fd.cFileName);
+							MoveFile(fd.cFileName,OutputFolder);
 						}
 				 }
 
