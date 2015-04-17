@@ -52,7 +52,7 @@ int main(int argc, CHAR* argv[])
 {
 
    //Set the current directory to your required folder 
-  ::SetCurrentDirectory ("C:\\NEWBASE\\tools\\SQL-Scripts\\");
+  ::SetCurrentDirectory ("C:\\NEWBASE\\tools\\");
    
   WIN32_FIND_DATA fd;
   FILETIME ftCreate;
@@ -60,8 +60,8 @@ int main(int argc, CHAR* argv[])
 	int noofDays;
 	cout<<"Enter the number of days:";
 	cin>>noofDays;
-  //Here you can filter the extension 
-	HANDLE hFind = ::FindFirstFile (("*.txt*"), &fd); 
+  
+	HANDLE hFind = ::FindFirstFile (("*.*"), &fd); 
    
 
    if (hFind != INVALID_HANDLE_VALUE) 
@@ -78,7 +78,7 @@ int main(int argc, CHAR* argv[])
                  if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 				 {
 						printf(("%s\n"), fd.cFileName);
-						ftCreate=fd.ftCreationTime;
+						ftCreate=fd.ftLastWriteTime;
 
 						FileTimeToSystemTime(&ftCreate, &stUTC);
 						SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
@@ -99,6 +99,11 @@ int main(int argc, CHAR* argv[])
 							CreateDirectory(OutputFolder, NULL);
 							strcat(OutputFolder,"\\");
 							strcat(OutputFolder,fd.cFileName);
+							if (OutputFolder) 
+								{
+								 remove(OutputFolder);
+								}
+					
 							MoveFile(fd.cFileName,OutputFolder);
 						}
 				 }
