@@ -48,69 +48,90 @@ string SystimeInString(SYSTEMTIME stime)
 		return dt;
 }
 
-int main(int argc, CHAR* argv[])
+void MoveCurrrentFolderFiles(char* strFolder, int noofDays)
 {
-
-   //Set the current directory to your required folder 
-  ::SetCurrentDirectory ("C:\\NEWBASE\\tools\\");
-   
-  WIN32_FIND_DATA fd;
-  FILETIME ftCreate;
-  SYSTEMTIME stUTC, stLocal,stCurrent;
-	int noofDays;
-	cout<<"Enter the number of days:";
-	cin>>noofDays;
-  
+	::SetCurrentDirectory (strFolder);
+	   
+	WIN32_FIND_DATA fd;
+	FILETIME ftCreate;
+	SYSTEMTIME stUTC, stLocal,stCurrent;
+			  
 	HANDLE hFind = ::FindFirstFile (("*.*"), &fd); 
-   
+	   
 
-   if (hFind != INVALID_HANDLE_VALUE) 
-      {
+	   if (hFind != INVALID_HANDLE_VALUE) 
+		  {
 
-						char sampleFolder[MAX_PATH];
-						strcpy(sampleFolder,DESTDIRECTORY);
-						strcat(sampleFolder,SAMPLEFOLDER);
-						CreateDirectory(sampleFolder, NULL);
-        do  {
-                  //Only print files present in the directory, ignore if it is directory, the flag
-                //FILE_ATTRIBUTE_DIRECTORY will tell you if the item found is a file or directory
+			char sampleFolder[MAX_PATH];
+			strcpy(sampleFolder,DESTDIRECTORY);
+			strcat(sampleFolder,SAMPLEFOLDER);
+			CreateDirectory(sampleFolder, NULL);
+			do  {
+					  //Only print files present in the directory, ignore if it is directory, the flag
+					//FILE_ATTRIBUTE_DIRECTORY will tell you if the item found is a file or directory
 
-                 if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+				 if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 				 {
+
 						printf(("%s\n"), fd.cFileName);
 						ftCreate=fd.ftLastWriteTime;
-
-						FileTimeToSystemTime(&ftCreate, &stUTC);
-						SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
-						string date=SystimeInString(stLocal);
-						
-						GetLocalTime(&stCurrent);
-						long diffTime=getDiffBetween(stLocal,stCurrent);
-						cout<<"Difference In times:"<<diffTime<<endl;
-
-						long noOfSeconds=noofDays*24*60*60;
-
-						if(diffTime>=noOfSeconds)
+						//if its a text file
+						if(stricmp(fd.cFileName+strlen(fd.cFileName)-4, ".txt")==0)
 						{
-							char OutputFolder[MAX_PATH];
-							strcpy(OutputFolder,sampleFolder);
-							strcat(OutputFolder,"\\");
-							strcat(OutputFolder,date.c_str());
-							CreateDirectory(OutputFolder, NULL);
-							strcat(OutputFolder,"\\");
-							strcat(OutputFolder,fd.cFileName);
-							if (OutputFolder) 
-								{
-								 remove(OutputFolder);
-								}
-					
-							MoveFile(fd.cFileName,OutputFolder);
-						}
+							FileTimeToSystemTime(&ftCreate, &stUTC);
+							SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+							string date=SystimeInString(stLocal);
+							
+							GetLocalTime(&stCurrent);
+							long diffTime=getDiffBetween(stLocal,stCurrent);
+							cout<<"Difference In times:"<<diffTime<<endl;
+
+							long noOfSeconds=noofDays*24*60*60;
+
+							if(diffTime>=noOfSeconds)
+							{
+								char OutputFile[MAX_PATH];
+								strcpy(OutputFile,sampleFolder);
+								strcat(OutputFile,"\\");
+								strcat(OutputFile,date.c_str());
+								CreateDirectory(OutputFile, NULL);
+								strcat(OutputFile,"\\");
+								strcat(OutputFile,fd.cFileName);
+								if (OutputFile) 
+									{
+									 remove(OutputFile);
+									}
+								MoveFile(fd.cFileName,OutputFile);
+							}
+						}//endif txt file
+				 }//endif file	
+				 else if(strcmp(fd.cFileName, ".")==0 || strcmp(fd.cFileName, "..")==0)
+				 {
+					 continue;
+				 }
+				 else
+				 {
+					 char strSubFolder[1024];
+					 strcpy(strSubFolder, strFolder);
+					 strcat(strSubFolder, "\\");
+					 strcat(strSubFolder, fd.cFileName);
+					 MoveCurrrentFolderFiles(strSubFolder,noofDays);
 				 }
 
+		} while (::FindNextFile (hFind, &fd));
+		::FindClose (hFind);
+	}
 
-} while (::FindNextFile (hFind, &fd));
-::FindClose (hFind);
-      }
-return 0;
+}
+
+int main(int argc, CHAR* argv[])
+{
+	int noofDays;
+	cout<<"Enter the number of days:";
+		cin>>noofDays;
+	MoveCurrrentFolderFiles("C:\\NEWBASE", noofDays);
+   //Set the current directory to your required folder 
+  
+
+	return 0;
 }
